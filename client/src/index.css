@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #f8fafc;
+    color: #0f172a;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Custom subtle transition styles */
+.transition-subtle {
+  transition: all 0.15s ease-in-out;
+}
+
+/* Custom checkbox animation */
+input[type="checkbox"]:checked {
+  accent-color: #2563eb;
+}
+
+/* Print / PDF Export Styling */
+@media print {
+  header, nav, button, .no-print {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .print-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .card-print {
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+}
+
+/* Dark Theme Overrides */
+body.dark-theme {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+body.dark-theme header,
+body.dark-theme nav,
+body.dark-theme .bg-white {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+body.dark-theme .border-slate-200,
+body.dark-theme .border-slate-100 {
+  border-color: #334155 !important;
+}
+
+body.dark-theme .text-slate-900 {
+  color: #f8fafc !important;
+}
+
+body.dark-theme .text-slate-800,
+body.dark-theme .text-slate-700 {
+  color: #e2e8f0 !important;
+}
+
+body.dark-theme .bg-slate-50 {
+  background-color: #0f172a !important;
+}
