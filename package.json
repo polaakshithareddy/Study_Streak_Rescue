@@ -4,7 +4,7 @@
   "description": "Gamified study recovery app with day-by-day catch-up schedules & Microsoft Rewards-inspired dashboard",
   "main": "server/index.js",
   "scripts": {
-    "install:all": "npm install --prefix server && npm install --prefix client",
+    "install:all": "npm install --prefix server --include=dev && npm install --prefix client --include=dev",
     "build:client": "npm run build --prefix client",
     "build": "npm run install:all && npm run build:client",
     "start": "node server/index.js"

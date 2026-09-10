@@ -27,6 +27,7 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/rewards', rewardsRoutes);
 
+const fs = require('fs');
 const path = require('path');
 
 // Health check endpoint
@@ -34,11 +35,12 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', app: 'Study Streak Rescue API', timestamp: new Date() });
 });
 
-// Serve static frontend assets in production mode
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/dist')));
+// Serve static frontend assets whenever client/dist exists
+const clientDistPath = path.join(__dirname, '../client/dist');
+if (fs.existsSync(clientDistPath) || process.env.NODE_ENV === 'production') {
+  app.use(express.static(clientDistPath));
   app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../client', 'dist', 'index.html'));
+    res.sendFile(path.resolve(clientDistPath, 'index.html'));
   });
 }
 
@@ -59,10 +61,11 @@ async function startServer() {
   
   try {
     // Attempt standard Mongoose connection
-    await mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 2000 });
+    await mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 10000 });
     console.log(`[MongoDB] Connected successfully to ${mongoUri}`);
   } catch (err) {
-    console.warn(`[MongoDB Warning] Could not connect to local Mongo at ${mongoUri}. Falling back to MongoMemoryServer...`);
+    console.error('[MongoDB Connection Error Detail]:', err.message);
+    console.warn(`[MongoDB Warning] Could not connect to Mongo at ${mongoUri}. Falling back to MongoMemoryServer...`);
     try {
       const { MongoMemoryServer } = require('mongodb-memory-server');
       const mongoServer = await MongoMemoryServer.create();
