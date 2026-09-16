@@ -44,13 +44,30 @@ if (fs.existsSync(clientDistPath) || process.env.NODE_ENV === 'production') {
   });
 }
 
+function getCleanMongoUri() {
+  const raw = process.env.MONGO_URI || process.env.MONGODB_URI || '';
+  return raw.trim().replace(/^["']|["']$/g, '');
+}
+
 // DB connection check middleware for API endpoints
-app.use('/api', (req, res, next) => {
+app.use('/api', async (req, res, next) => {
   if (req.path === '/health') return next();
+  if (mongoose.connection.readyState !== 1) {
+    const mongoUri = getCleanMongoUri();
+    if (mongoUri) {
+      try {
+        console.log('[MongoDB] Retrying connection to MongoDB...');
+        await mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 5000 });
+        console.log('[MongoDB] Connected successfully on retry!');
+      } catch (retryErr) {
+        console.error('[MongoDB Retry Error]:', retryErr.message);
+      }
+    }
+  }
   if (mongoose.connection.readyState !== 1) {
     return res.status(503).json({
       error: {
-        message: 'Database Connection Unavailable: Backend is not connected to MongoDB Atlas. Please ensure MONGO_URI is configured on Render and 0.0.0.0/0 is allowed in MongoDB Atlas Network Access.',
+        message: 'Database Connection Unavailable: Backend is not connected to MongoDB. Please verify MONGO_URI on Render and whitelist 0.0.0.0/0 in MongoDB Atlas.',
         code: 'DB_DISCONNECTED'
       }
     });
@@ -75,7 +92,7 @@ app.use((err, req, res, next) => {
 });
 
 async function startServer() {
-  let mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/study_streak_rescue';
+  let mongoUri = getCleanMongoUri() || 'mongodb://127.0.0.1:27017/study_streak_rescue';
   
   try {
     // Attempt standard Mongoose connection
