@@ -57,15 +57,15 @@ app.use((err, req, res, next) => {
 });
 
 async function startServer() {
-  let mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/study_streak_rescue';
+  let mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/study_streak_rescue';
   
   try {
     // Attempt standard Mongoose connection
     await mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 10000 });
-    console.log(`[MongoDB] Connected successfully to ${mongoUri}`);
+    console.log(`[MongoDB] Connected successfully to ${mongoUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')}`);
   } catch (err) {
     console.error('[MongoDB Connection Error Detail]:', err.message);
-    console.warn(`[MongoDB Warning] Could not connect to Mongo at ${mongoUri}. Falling back to MongoMemoryServer...`);
+    console.warn(`[MongoDB Warning] Could not connect to Mongo at ${mongoUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')}. Falling back to MongoMemoryServer...`);
     try {
       const { MongoMemoryServer } = require('mongodb-memory-server');
       const mongoServer = await MongoMemoryServer.create();
