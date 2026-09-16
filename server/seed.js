@@ -9,10 +9,10 @@ const Plan = require('./models/Plan');
 const Task = require('./models/Task');
 
 async function seed() {
-  let mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/study_streak_rescue';
+  let mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/study_streak_rescue';
 
   try {
-    await mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 2000 });
+    await mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 10000 });
     console.log(`[Seed] Connected to ${mongoUri}`);
   } catch (err) {
     console.warn(`[Seed] Could not connect to local Mongo. Launching MongoMemoryServer...`);

@@ -44,13 +44,31 @@ if (fs.existsSync(clientDistPath) || process.env.NODE_ENV === 'production') {
   });
 }
 
+// DB connection check middleware for API endpoints
+app.use('/api', (req, res, next) => {
+  if (req.path === '/health') return next();
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      error: {
+        message: 'Database Connection Unavailable: Backend is not connected to MongoDB Atlas. Please ensure MONGO_URI is configured on Render and 0.0.0.0/0 is allowed in MongoDB Atlas Network Access.',
+        code: 'DB_DISCONNECTED'
+      }
+    });
+  }
+  next();
+});
+
 // Centralized error handling middleware
 app.use((err, req, res, next) => {
   console.error('[API ERROR]', err);
+  let message = err.message || 'Internal Server Error';
+  if (message.includes('buffering timed out') || message.includes('connect ECONNREFUSED')) {
+    message = 'Database Connection Timeout: Unable to connect to MongoDB. Please ensure MONGO_URI is set on Render and IP address 0.0.0.0/0 is allowed in MongoDB Atlas Network Access.';
+  }
   const status = err.status || 500;
   res.status(status).json({
     error: {
-      message: err.message || 'Internal Server Error',
+      message,
       code: err.code || 'SERVER_ERROR'
     }
   });
